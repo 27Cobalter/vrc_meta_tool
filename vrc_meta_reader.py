@@ -1,3 +1,4 @@
+import datetime
 import os
 import sys
 
@@ -28,7 +29,7 @@ def main(args):
         if chunk_type == b"vrCu":
             print("User:", chunk_data.decode())
         if chunk_type == b"vrCd":
-            print("Date:", chunk_data.decode())
+            print("Date:", datetime.datetime.strptime(chunk_data.decode()[:-3], '%Y%m%d%H%M%S'))
         elif chunk_type == b"vrCw":
             print("World:", chunk_data.decode())
 
