@@ -118,7 +118,9 @@ def main():
     with open("config.yml", "r") as conf:
         config = yaml.load(conf, Loader=yaml.SafeLoader)
 
-    log_file = select_log()
+    log_file = config["log_file"]
+    if log_file == "":
+        log_file = select_log()
 
     vrc_meta_tool = VrcMetaTool(config)
 
