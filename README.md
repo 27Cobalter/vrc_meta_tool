@@ -18,7 +18,7 @@ $ pip install pyyaml
 - 書き込むとき
   - VRChatを起動した状態でvrc_meta_writerを起動
 - 画像についているメタデータを読むとき
-  - vrc_meta_readerの引数として画像ファイルを与える
+  - vrc_meta_readerの引数として画像ファイルのパスを与える
   - またはreader.batに画像をドラッグアンドドロップ
 
 ## 設定ファイル
