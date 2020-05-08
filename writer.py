@@ -4,22 +4,51 @@ import os
 import re
 import shutil
 import time
+import yaml
 
 from sys import stdout
 from struct import pack
 from zlib import crc32, compress
 
+# ログツール関連共通化したい
+def select_log():
+    vrc_dir = os.environ["USERPROFILE"] + "\\AppData\\LocalLow\\VRChat\\VRChat\\"
+    log_files = glob.glob(vrc_dir + "output_log_*.txt")
+    log_files.sort(key=os.path.getctime, reverse=True)
+    return log_files[0]
+
+
+def tail(thefile):
+    # thefile.seek(0, 2)
+    while True:
+        line = thefile.readline()
+        if not line:
+            time.sleep(0.5)
+            continue
+        line = line.rstrip("\n").rstrip("\r")
+        if line != "":
+            yield line
+
+
+class LogToolBase:
+    def init():
+        pass
+
+    def execute(line):
+        pass
+
+
 # 本体
 class VrcMetaTool(LogToolBase):
-    config = {}
+    config = []
     regex = {}
     world = ""
     users = []
     date_regex = ""
 
-    def __init__(self):
+    def __init__(self, config):
         print("Initialize!")
-        self.config["out_dir"] = "meta_pic"
+        self.config = config
 
         self.regex["PlayerJoin"] = re.compile(
             ".*?\[NetworkManager\] OnPlayerJoined (.*)"
@@ -85,39 +114,14 @@ class VrcMetaTool(LogToolBase):
             f.write(self.chunk(b"IEND", b""))
 
 
-# ログツール関連共通化したい
-def select_log():
-    vrc_dir = os.environ["USERPROFILE"] + "\\AppData\\LocalLow\\VRChat\\VRChat\\"
-    log_files = glob.glob(vrc_dir + "output_log_*.txt")
-    log_files.sort(key=os.path.getctime, reverse=True)
-    return log_files[0]
-
-
-def tail(thefile):
-    # thefile.seek(0, 2)
-    while True:
-        line = thefile.readline()
-        if not line:
-            time.sleep(0.5)
-            continue
-        line = line.rstrip("\n").rstrip("\r")
-        if line != "":
-            yield line
-
-
-class LogToolBase:
-    def init():
-        pass
-
-    def execute(line):
-        pass
-
-
 def main():
+    config = []
+    with open("config.yml", "r") as conf:
+        config = yaml.load(conf, Loader=yaml.SafeLoader)
 
     log_file = select_log()
 
-    vrc_meta_tool = VrcMetaTool()
+    vrc_meta_tool = VrcMetaTool(config)
 
     with open(log_file, "r", encoding="utf-8") as f:
         print("open logfile : ", log_file)
