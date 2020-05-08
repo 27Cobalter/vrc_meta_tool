@@ -5,7 +5,7 @@
 - VRChatで写真を撮ったときにワールド，インスタンスにいる人，撮影時刻をpngに埋め込んで記録するツール
 
 ## ダウンロード
-- まだ
+- https://github.com/27Cobalter/vrc_meta_tool/release
 
 ## 自分で色々やりたい人向け
 ### 依存パッケージ
