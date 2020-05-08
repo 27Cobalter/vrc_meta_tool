@@ -46,7 +46,7 @@ class VrcMetaTool(LogToolBase):
     date_regex = ""
 
     def __init__(self, config):
-        print("Initialize!")
+        os.makedirs(config["out_dir"], exist_ok=True)
         self.config = config
 
         self.regex["PlayerJoin"] = re.compile(
