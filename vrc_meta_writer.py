@@ -6,9 +6,8 @@ import shutil
 import time
 import yaml
 
-from sys import stdout
 from struct import pack
-from zlib import crc32, compress
+from zlib import crc32
 
 # ログツール関連共通化したい
 def select_log():
