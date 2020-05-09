@@ -40,60 +40,54 @@ class LogToolBase:
 # 本体
 class VrcMetaTool(LogToolBase):
     config = []
-    regex = {}
+    events = {}
     world = ""
     users = []
     photo_date_regex = re.compile(
         ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png"
     )
     log_date_regex = re.compile(
-        "([0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) .*"
+        "([0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) .*?"
     )
 
     def __init__(self, config):
         os.makedirs(config["out_dir"], exist_ok=True)
         self.config = config
 
-        self.regex["PlayerJoin"] = re.compile(
-            ".*?\[NetworkManager\] OnPlayerJoined (.*)"
-        )
-        self.regex["PlayerLeft"] = re.compile(".*?\[NetworkManager\] OnPlayerLeft (.*)")
-        self.regex["EnterRoom"] = re.compile(".*?\[RoomManager\] Entering Room: (.*)")
-        self.regex["ScreenShot"] = re.compile(".*?Took screenshot to: (.*)")
+        self.events["PlayerJoin"] = "[NetworkManager] OnPlayerJoined "
+        self.events["PlayerLeft"] = "[NetworkManager] OnPlayerLeft "
+        self.events["EnterRoom"] = ".[RoomManager] Entering Room: "
+        self.events["ScreenShot"] = "Took screenshot to: "
 
     def execute(self, line):
-        for event in self.regex:
-            match = self.regex[event].match(line)
-            if match:
+        for event in self.events:
+            index = line.find(self.events[event])
+            if index != -1:
+                body = line[index + len(self.events[event]) :]
                 print(
-                    self.log_date_regex.match(line).group(1),
-                    "\t" + event + ": " + match.group(1),
+                    self.log_date_regex.match(line).group(1), "\t" + event + ": " + body
                 )
                 if event == "PlayerJoin":
-                    self.users.append(match.group(1))
+                    self.users.append(body)
                 elif event == "PlayerLeft":
-                    self.users.remove(match.group(1))
+                    self.users.remove(body)
                 elif event == "EnterRoom":
-                    self.world = match.group(1)
+                    self.world = body
                     self.users = []
                 elif event == "ScreenShot":
-                    if not os.path.exists(match.group(1)):
-                        print(
-                            "\tError", os.path.abspath(match.group(1)), "is not found."
-                        )
+                    if not os.path.exists(body):
+                        print("\tError", os.path.abspath(body), "is not found.")
                         return
-                    date = "".join(self.photo_date_regex.match(match.group(1)).groups())
-                    if not self.write(match.group(1), "".join(date)):
+                    date = "".join(self.photo_date_regex.match(body).groups())
+                    if not self.write(body, "".join(date)):
                         return
 
                     print(
                         "\tWrite:",
-                        match.group(1),
+                        body,
                         "\n\t\t->",
                         os.path.abspath(
-                            os.path.join(
-                                self.config["out_dir"], os.path.basename(match.group(1))
-                            )
+                            os.path.join(self.config["out_dir"], os.path.basename(body))
                         ),
                     )
                     print("\t", date, self.world)
