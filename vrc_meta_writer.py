@@ -43,7 +43,12 @@ class VrcMetaTool(LogToolBase):
     regex = {}
     world = ""
     users = []
-    date_regex = ""
+    photo_date_regex = re.compile(
+        ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png"
+    )
+    log_date_regex = re.compile(
+        "([0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) .*"
+    )
 
     def __init__(self, config):
         os.makedirs(config["out_dir"], exist_ok=True)
@@ -56,15 +61,14 @@ class VrcMetaTool(LogToolBase):
         self.regex["EnterRoom"] = re.compile(".*?\[RoomManager\] Entering Room: (.*)")
         self.regex["ScreenShot"] = re.compile(".*?Took screenshot to: (.*)")
 
-        self.date_regex = re.compile(
-            ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png"
-        )
-
     def execute(self, line):
         for event in self.regex:
             match = self.regex[event].match(line)
             if match:
-                print(datetime.datetime.now(), "\t" + event + ": " + match.group(1))
+                print(
+                    self.log_date_regex.match(line).group(1),
+                    "\t" + event + ": " + match.group(1),
+                )
                 if event == "PlayerJoin":
                     self.users.append(match.group(1))
                 elif event == "PlayerLeft":
@@ -78,8 +82,9 @@ class VrcMetaTool(LogToolBase):
                             "\tError", os.path.abspath(match.group(1)), "is not found."
                         )
                         return
-                    date = "".join(self.date_regex.match(match.group(1)).groups())
-                    self.write(match.group(1), "".join(date))
+                    date = "".join(self.photo_date_regex.match(match.group(1)).groups())
+                    if not self.write(match.group(1), "".join(date)):
+                        return
 
                     print(
                         "\tWrite:",
@@ -95,15 +100,34 @@ class VrcMetaTool(LogToolBase):
                     print("\t", self.users)
 
     # pngチャンク関連関数
+    def has_meta(self, image):
+        total_length = len(image)
+        end = 4
+        while end + 8 < total_length:
+            length = int.from_bytes(image[end + 4 : end + 8], "big")
+            chunk_type = end + 8
+            chunk_data = chunk_type + 4
+            end = chunk_data + length
+            if image[chunk_type:chunk_data] == b"vrCd":
+                return True
+        return False
+
     def chunk(self, name, data):
         return pack("!I4s%dsI" % len(data), len(data), name, data, crc32(name + data))
 
     def write(self, file, date):
         self.users.sort()
-        shutil.copy2(os.path.abspath(file), self.config["out_dir"])
+        if not os.path.samefile(os.path.dirname(file), self.config["out_dir"]):
+            shutil.copy2(os.path.abspath(file), self.config["out_dir"])
         with open(
             os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
         ) as f:
+            image = f.read()
+            assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+            if self.has_meta(image):
+                print(file, "already has meta data")
+                return False
+
             # IEND以降を上書きする
             f.seek(-12, 2)
             f.write(self.chunk(b"vrCd", date.encode("utf-8")))
@@ -111,6 +135,7 @@ class VrcMetaTool(LogToolBase):
             for user in self.users:
                 f.write(self.chunk(b"vrCu", user.encode("utf-8")))
             f.write(self.chunk(b"IEND", b""))
+            return True
 
 
 def main():
