@@ -100,7 +100,8 @@ class VrcMetaTool(LogToolBase):
 
     def write(self, file, date):
         self.users.sort()
-        shutil.copy2(os.path.abspath(file), self.config["out_dir"])
+        if not os.path.samefile(os.path.dirname(file), self.config["out_dir"]):
+            shutil.copy2(os.path.abspath(file), self.config["out_dir"])
         with open(
             os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
         ) as f:
