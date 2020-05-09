@@ -43,7 +43,12 @@ class VrcMetaTool(LogToolBase):
     regex = {}
     world = ""
     users = []
-    date_regex = ""
+    photo_date_regex = re.compile(
+        ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png"
+    )
+    log_date_regex = re.compile(
+        "([0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) .*"
+    )
 
     def __init__(self, config):
         os.makedirs(config["out_dir"], exist_ok=True)
@@ -56,15 +61,14 @@ class VrcMetaTool(LogToolBase):
         self.regex["EnterRoom"] = re.compile(".*?\[RoomManager\] Entering Room: (.*)")
         self.regex["ScreenShot"] = re.compile(".*?Took screenshot to: (.*)")
 
-        self.date_regex = re.compile(
-            ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png"
-        )
-
     def execute(self, line):
         for event in self.regex:
             match = self.regex[event].match(line)
             if match:
-                print(datetime.datetime.now(), "\t" + event + ": " + match.group(1))
+                print(
+                    self.log_date_regex.match(line).group(1),
+                    "\t" + event + ": " + match.group(1),
+                )
                 if event == "PlayerJoin":
                     self.users.append(match.group(1))
                 elif event == "PlayerLeft":
@@ -78,7 +82,7 @@ class VrcMetaTool(LogToolBase):
                             "\tError", os.path.abspath(match.group(1)), "is not found."
                         )
                         return
-                    date = "".join(self.date_regex.match(match.group(1)).groups())
+                    date = "".join(self.photo_date_regex.match(match.group(1)).groups())
                     self.write(match.group(1), "".join(date))
 
                     print(
