@@ -83,7 +83,8 @@ class VrcMetaTool(LogToolBase):
                         )
                         return
                     date = "".join(self.photo_date_regex.match(match.group(1)).groups())
-                    self.write(match.group(1), "".join(date))
+                    if not self.write(match.group(1), "".join(date)):
+                        return
 
                     print(
                         "\tWrite:",
@@ -99,6 +100,18 @@ class VrcMetaTool(LogToolBase):
                     print("\t", self.users)
 
     # pngチャンク関連関数
+    def has_meta(self, image):
+        total_length = len(image)
+        end = 4
+        while end + 8 < total_length:
+            length = int.from_bytes(image[end + 4 : end + 8], "big")
+            chunk_type = end + 8
+            chunk_data = chunk_type + 4
+            end = chunk_data + length
+            if image[chunk_type:chunk_data] == b"vrCd":
+                return True
+        return False
+
     def chunk(self, name, data):
         return pack("!I4s%dsI" % len(data), len(data), name, data, crc32(name + data))
 
@@ -109,6 +122,12 @@ class VrcMetaTool(LogToolBase):
         with open(
             os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
         ) as f:
+            image = f.read()
+            assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+            if self.has_meta(image):
+                print(file, "already has meta data")
+                return False
+
             # IEND以降を上書きする
             f.seek(-12, 2)
             f.write(self.chunk(b"vrCd", date.encode("utf-8")))
@@ -116,6 +135,7 @@ class VrcMetaTool(LogToolBase):
             for user in self.users:
                 f.write(self.chunk(b"vrCu", user.encode("utf-8")))
             f.write(self.chunk(b"IEND", b""))
+            return True
 
 
 def main():
