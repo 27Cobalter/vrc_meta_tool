@@ -24,9 +24,11 @@ def tail(thefile):
         if not line:
             time.sleep(0.5)
             continue
+        # VRChatが悪い
+        if line == "\n" or line == "\r\n":
+            continue
         line = line.rstrip("\n").rstrip("\r")
-        if line != "":
-            yield line
+        yield line
 
 
 class LogToolBase:
