@@ -27,7 +27,7 @@ def tail(thefile):
         # VRChatが悪い
         if line == "\n" or line == "\r\n":
             continue
-        line = line.rstrip("\n").rstrip("\r")
+        line = line.rstrip("\n")
         yield line
 
 
