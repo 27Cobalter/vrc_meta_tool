@@ -58,7 +58,7 @@ class VrcMetaTool(LogToolBase):
 
         self.events["PlayerJoin"] = "[NetworkManager] OnPlayerJoined "
         self.events["PlayerLeft"] = "[NetworkManager] OnPlayerLeft "
-        self.events["EnterRoom"] = ".[RoomManager] Entering Room: "
+        self.events["EnterRoom"] = "[RoomManager] Entering Room: "
         self.events["ScreenShot"] = "Took screenshot to: "
 
     def execute(self, line):
