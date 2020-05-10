@@ -121,7 +121,7 @@ class VrcMetaTool(LogToolBase):
             image = f.read()
             assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
             if self.has_meta(image):
-                print(file, "already has meta data")
+                print("\t", file, "already has meta data")
                 return False
 
             # IEND以降を上書きする
