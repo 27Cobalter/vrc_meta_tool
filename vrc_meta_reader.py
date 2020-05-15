@@ -1,5 +1,7 @@
 import datetime
+import glob
 import os
+import re
 import sys
 
 
@@ -17,21 +19,45 @@ def chunk_iter(data):
 
 
 def main(args):
-    image_path = args[1]
-    print(image_path)
-    with open(image_path, "rb") as image:
-        data = image.read()
+    files = []
+    user_name = ""
+    if os.path.isdir(args[1]):
+        files = glob.glob(os.path.join(args[1], "*.png"))
+    else:
+        files.append(args[1])
 
-    assert data[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
-    print("-" * 80, "chunks of: %s" % image_path, "-" * 80, sep="\n")
+    if len(args) == 3:
+        user_name = args[2]
 
-    for chunk_type, chunk_data in chunk_iter(data):
-        if chunk_type == b"vrCu":
-            print("User:", chunk_data.decode())
-        if chunk_type == b"vrCd":
-            print("Date:", datetime.datetime.strptime(chunk_data.decode()[:-3], '%Y%m%d%H%M%S'))
-        elif chunk_type == b"vrCw":
-            print("World:", chunk_data.decode())
+    for image_path in files:
+        with open(image_path, "rb") as image:
+            data = image.read()
+
+        if data[:8] != b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+            continue
+        if user_name == "":
+            print(image_path)
+            print("-" * 80, "chunks of: %s" % image_path, "-" * 80, sep="\n")
+
+            for chunk_type, chunk_data in chunk_iter(data):
+                if chunk_type == b"vrCu":
+                    print("User:", chunk_data.decode())
+                elif chunk_type == b"vrCd":
+                    print(
+                        "Date:",
+                        datetime.datetime.strptime(
+                            chunk_data.decode()[:-3], "%Y%m%d%H%M%S"
+                        ),
+                    )
+                elif chunk_type == b"vrCw":
+                    print("World:", chunk_data.decode())
+        else:
+            for chunk_type, chunk_data in chunk_iter(data):
+                if chunk_type == b"vrCu":
+                    user = chunk_data.decode()
+                    if user_name in user:
+                        print(image_path)
+                        print(user)
 
 
 if __name__ == "__main__":
