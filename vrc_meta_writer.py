@@ -72,7 +72,8 @@ class VrcMetaTool(LogToolBase):
                 if event == "PlayerJoin":
                     self.users.append(body)
                 elif event == "PlayerLeft":
-                    self.users.remove(body)
+                    if body in self.users:
+                        self.users.remove(body)
                 elif event == "EnterRoom":
                     self.world = body
                     self.users = []
