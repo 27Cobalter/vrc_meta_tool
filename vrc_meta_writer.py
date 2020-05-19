@@ -41,10 +41,13 @@ class LogToolBase:
 
 # 本体
 class VrcMetaTool(LogToolBase):
-    config = []
+    config = {}
+    user_names = []
     events = {}
+
     world = ""
     users = []
+
     photo_date_regex = re.compile(
         ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png"
     )
@@ -52,9 +55,10 @@ class VrcMetaTool(LogToolBase):
         "([0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) .*?"
     )
 
-    def __init__(self, config):
+    def __init__(self, config, user_names):
         os.makedirs(config["out_dir"], exist_ok=True)
         self.config = config
+        self.user_names = user_names
 
         self.events["PlayerJoin"] = "[NetworkManager] OnPlayerJoined "
         self.events["PlayerLeft"] = "[NetworkManager] OnPlayerLeft "
@@ -130,21 +134,30 @@ class VrcMetaTool(LogToolBase):
             f.write(self.chunk(b"vrCd", date.encode("utf-8")))
             f.write(self.chunk(b"vrCw", self.world.encode("utf-8")))
             for user in self.users:
+                if user in self.user_names:
+                    user = user + " : " + self.user_names.get(user)
                 f.write(self.chunk(b"vrCu", user.encode("utf-8")))
             f.write(self.chunk(b"IEND", b""))
             return True
 
 
 def main():
-    config = []
-    with open("config.yml", "r") as conf:
+    config = {}
+    with open("config.yml", "r", encoding="utf-8") as conf:
         config = yaml.load(conf, Loader=yaml.SafeLoader)
+
+    user_names = {}
+    with open("user_list.yml", "r", encoding="utf-8") as user_info:
+        users = yaml.load(user_info, Loader=yaml.SafeLoader)
+        for user in users:
+            user_names[user["name"]] = user["screen_name"]
+    print(user_names)
 
     log_file = config["log_file"]
     if log_file == "":
         log_file = select_log()
 
-    vrc_meta_tool = VrcMetaTool(config)
+    vrc_meta_tool = VrcMetaTool(config, user_names)
 
     with open(log_file, "r", encoding="utf-8") as f:
         print("open logfile : ", log_file)

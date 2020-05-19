@@ -25,9 +25,19 @@ $ pip install pyyaml
 
 ## 設定ファイル
 - 例
+- config.yml
 ```config.yml
 # 読み込むログファイルの指定　過去のログファイルから画像にタグ付けする場合に使用
 log_file: ""
 # メタデータを付与した写真を保存するディレクトリ
 out_dir: "meta_pic"
+```
+
+- user_list.yml
+```user_list.yml
+# nameにVRChatのユーザ名，screen_nameをTwitterのスクリーンネームにしておくとTwitterのスクリーンネームも保存してくれる
+- name: "27Cobalter"
+  screen_name: "@27Cobalter"
+- name: "bootjp／ぶーと"
+  screen_name: "@bootjp"
 ```
