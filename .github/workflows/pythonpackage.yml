@@ -26,9 +26,10 @@ jobs:
         python -m pip install PyInstaller
         pyinstaller.exe vrc_meta_writer.py -F
         pyinstaller.exe vrc_meta_reader.py -F
+        pyinstaller.exe user_list_sorter.py -F
     - name: Achive to zip
       run: |
-        powershell compress-archive -Path dist/vrc_meta_writer.exe,dist/vrc_meta_reader.exe,config.yml,user_list.yml,reader.bat,README.md -DestinationPath dist/vrc_meta_tool.zip
+        powershell compress-archive -Path dist/vrc_meta_writer.exe,dist/vrc_meta_reader.exe,dist/user_list_sorter.exe,config.yml,user_list.yml,reader.bat,README.md -DestinationPath dist/vrc_meta_tool.zip
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
