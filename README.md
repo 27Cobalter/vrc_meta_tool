@@ -40,3 +40,5 @@ out_dir: "meta_pic"
 - name: "bootjp／ぶーと"
   screen_name: "@bootjp"
 ```
+
+- `user_list.yml`の編集後に`user_list_sorter.exe`にドラッグアンドドロップするとキー値の昇順にソートされます(必要はないけど気になる人向け)
