@@ -72,7 +72,7 @@ class VrcMetaTool(LogToolBase):
         for event in self.events:
             index = line.find(self.events[event])
             if index != -1:
-                body = line[index + len(self.events[event]) :]
+                body = repr(line[index + len(self.events[event]) :])[1:-1]
                 print(
                     self.log_date_regex.match(line).group(1), "\t" + event + ": " + body
                 )
@@ -153,7 +153,7 @@ def main():
     with open("user_list.yml", "r", encoding="utf-8") as user_info:
         users = yaml.load(user_info, Loader=yaml.SafeLoader)
         for user in users:
-            user_names[user["name"]] = user["screen_name"]
+            user_names[repr(user["name"])[1:-1]] = user["screen_name"]
 
     process_exist = False
     for p in psutil.process_iter(attrs=["pid", "name"]):
