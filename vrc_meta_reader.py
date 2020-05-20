@@ -1,6 +1,7 @@
 import datetime
 import glob
 import os
+import psutil
 import re
 import sys
 
@@ -17,8 +18,23 @@ def chunk_iter(data):
 
         yield (data[chunk_type:chunk_data], data[chunk_data:end])
 
+def end():
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["pid"] == os.getpid():
+            if p.info["name"] != "vrc_meta_reader.exe":
+                break
+            print("\n\nEnterを押して終了")
+            input()
+
 
 def main(args):
+    if len(args) == 1:
+        print("Usage: vrc_meta_reader.py  file\r\n"
+              "       vrc_meta_reader.py  file  user_name\r\n"
+              "\r\n"
+              "vrc_meta_reader.exeに画像ファイルをドラッグアンドドロップしてください")
+        end()
+        return
     files = []
     user_name = ""
     if os.path.isdir(args[1]):
@@ -58,6 +74,7 @@ def main(args):
                     if user_name in user:
                         print(image_path)
                         print(user)
+    end()
 
 
 if __name__ == "__main__":

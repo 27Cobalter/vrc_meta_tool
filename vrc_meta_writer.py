@@ -179,6 +179,13 @@ def main():
         for line in lines:
             vrc_meta_tool.execute(line)
 
+        for p in psutil.process_iter(attrs=["pid", "name"]):
+            if p.info["pid"] == os.getpid():
+                if p.info["name"] != "vrc_meta_writer.exe":
+                    break
+                print("\n\nEnterを押して終了")
+                input()
+
 
 if __name__ == "__main__":
     main()
