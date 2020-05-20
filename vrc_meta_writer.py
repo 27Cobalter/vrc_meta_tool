@@ -154,7 +154,6 @@ def main():
         users = yaml.load(user_info, Loader=yaml.SafeLoader)
         for user in users:
             user_names[user["name"]] = user["screen_name"]
-    print(user_names)
 
     process_exist = False
     for p in psutil.process_iter(attrs=["pid", "name"]):
