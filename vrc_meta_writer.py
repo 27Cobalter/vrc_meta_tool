@@ -1,6 +1,7 @@
 import datetime
 import glob
 import os
+import psutil
 import re
 import shutil
 import time
@@ -17,11 +18,13 @@ def select_log():
     return log_files[0]
 
 
-def tail(thefile):
+def tail(thefile, realtime):
     # thefile.seek(0, 2)
     while True:
         line = thefile.readline()
         if not line:
+            if realtime:
+                break
             time.sleep(0.5)
             continue
         # VRChatが悪い
@@ -153,6 +156,17 @@ def main():
             user_names[user["name"]] = user["screen_name"]
     print(user_names)
 
+    process_exist = False
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["name"] == "VRChat.exe":
+            # VRChatを起動中で起動引数が設定されていなかったら終了
+            if not "--enable-sdk-log-levels" in p.cmdline():
+                print(
+                    "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
+                )
+                return
+            process_exist = True
+
     log_file = config["log_file"]
     if log_file == "":
         log_file = select_log()
@@ -162,7 +176,7 @@ def main():
     with open(log_file, "r", encoding="utf-8") as f:
         print("open logfile : ", log_file)
 
-        lines = tail(f)
+        lines = tail(f, (config["log_file"] != "") or not process_exist)
         for line in lines:
             vrc_meta_tool.execute(line)
 
