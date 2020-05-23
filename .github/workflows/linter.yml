@@ -2,6 +2,8 @@ name: Python linter
 
 on: [pull_request]
 
-- name: Black Code Formatter
-  uses: lgeiger/black-action@v1.0.1
-  args: ". --check"
+jobs:
+  build:
+  - name: Black Code Formatter
+    uses: lgeiger/black-action@v1.0.1
+    args: ". --check"
