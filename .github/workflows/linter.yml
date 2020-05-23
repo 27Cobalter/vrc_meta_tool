@@ -4,6 +4,12 @@ on: [pull_request]
 
 jobs:
   build:
-  - name: Black Code Formatter
-    uses: lgeiger/black-action@v1.0.1
-    args: ". --check"
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [3.7]
+    steps:
+      - name: Black Code Formatter
+        uses: lgeiger/black-action@v1.0.1
+        args: ". --check"
