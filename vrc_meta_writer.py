@@ -21,17 +21,20 @@ def select_log():
 def tail(thefile, realtime):
     # thefile.seek(0, 2)
     while True:
-        line = thefile.readline()
-        if not line:
-            if realtime:
-                break
-            time.sleep(0.5)
+        try:
+            line = thefile.readline()
+            if not line:
+                if realtime:
+                    break
+                time.sleep(0.5)
+                continue
+            # VRChatが悪い
+            if line == "\n" or line == "\r\n":
+                continue
+            line = line.rstrip("\n")
+            yield line
+        except UnicodeDecodeError:
             continue
-        # VRChatが悪い
-        if line == "\n" or line == "\r\n":
-            continue
-        line = line.rstrip("\n")
-        yield line
 
 
 class LogToolBase:
