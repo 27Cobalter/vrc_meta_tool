@@ -4,3 +4,4 @@ on: [pull_request]
 
 - name: Black Code Formatter
   uses: lgeiger/black-action@v1.0.1
+  args: ". --check"
