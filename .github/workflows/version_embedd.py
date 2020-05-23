@@ -7,8 +7,8 @@ VSVersionInfo(
   ffi=FixedFileInfo(
     # filevers and prodvers should be always a tuple with four items: (1, 2, 3, 4)
     # Set not needed items to zero 0.
-    filevers=(78, 0, 3904, 108),
-    prodvers=(78, 0, 3904, 108),
+    filevers=({version}),
+    prodvers=({version}),
     # Contains a bitmask that specifies the valid bits 'flags'r
     mask=0x17,
     # Contains a bitmask that specifies the Boolean attributes of the file.
