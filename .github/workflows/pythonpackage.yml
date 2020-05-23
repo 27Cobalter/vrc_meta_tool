@@ -21,12 +21,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip pyyaml psutil
+
+    - name: Generate version file
+      run: |
+        - python .github/workflows/version_embedd.py > version.txt
     - name: Build as binary
       run: |
         python -m pip install PyInstaller
-        pyinstaller.exe vrc_meta_writer.py --version-file ".github/workflows/version_embedd.py" -F
-        pyinstaller.exe vrc_meta_reader.py --version-file ".github/workflows/version_embedd.py" -F
-        pyinstaller.exe user_list_sorter.py --version-file ".github/workflows/version_embedd.py" -F
+        pyinstaller.exe vrc_meta_writer.py --version-file "version.txt" -F
+        pyinstaller.exe vrc_meta_reader.py --version-file "version.txt" -F
+        pyinstaller.exe user_list_sorter.py --version-file "version.txt" -F
     - name: Achive to zip
       run: |
         powershell compress-archive -Path dist/vrc_meta_writer.exe,dist/vrc_meta_reader.exe,dist/user_list_sorter.exe,config.yml,user_list.yml,README.md -DestinationPath dist/vrc_meta_tool.zip
