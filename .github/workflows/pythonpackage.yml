@@ -1,6 +1,9 @@
 name: Python package
 
-on: [tags]
+on:
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -25,7 +28,6 @@ jobs:
     - name: Generate version file
       run: |
         python .github/workflows/version_embedd.py > version.txt
-      if: startsWith(github.ref, 'refs/tags/')
 
     - name: Build as binary
       run: |
@@ -38,7 +40,6 @@ jobs:
         powershell compress-archive -Path dist/vrc_meta_writer.exe,dist/vrc_meta_reader.exe,dist/user_list_sorter.exe,config.yml,user_list.yml,README.md -DestinationPath dist/vrc_meta_tool.zip
     - name: Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: "dist/vrc_meta_tool.zip"
       env:
