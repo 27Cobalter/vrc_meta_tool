@@ -1,13 +1,16 @@
 import os
 import re
 
-commitHash = os.environ.get("GITHUB_SHA")
+commit_hash = os.environ.get("GITHUB_SHA")
 version_number = []
-pattern = re.compile('.*v([0-9]+)\.([0-9]+).([0-9]+).')
+pattern = re.compile(".*v([0-9]+)\.([0-9]+).([0-9]+).")
 version_number = re.match(pattern, os.environ.get("GITHUB_REF")).groups()
-version_number_str = "{}.{}.{}".format(version_number[0], version_number[1], version_number[2])
+version_number_str = "{}.{}.{}".format(
+    version_number[0], version_number[1], version_number[2]
+)
 
-print(f'''
+print(
+    f"""
 VSVersionInfo(
   ffi=FixedFileInfo(
     filevers=({version_number[0]}, {version_number[1]}, {version_number[2]}, 0),
@@ -34,9 +37,10 @@ VSVersionInfo(
         StringStruct(u'ProductVersion', u'{version_number_str}'),
         StringStruct(u'CompanyShortName', u'None'),
         StringStruct(u'ProductShortName', u'vrc_meta_tool'),
-        StringStruct(u'LastChange', u'{commitHash}'),
+        StringStruct(u'LastChange', u'{commit_hash}'),
         StringStruct(u'Official Build', u'1')])
       ]),
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]
-)''')
+)"""
+)
