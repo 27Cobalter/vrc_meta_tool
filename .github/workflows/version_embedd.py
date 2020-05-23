@@ -1,7 +1,7 @@
 import os
 import re
 
-version = os.environ.get("GITHUB_SHA")
+commitHash = os.environ.get("GITHUB_SHA")
 version_number = []
 pattern = re.compile('.*v([0-9]+)\.([0-9]+).([0-9]+).')
 version_number = re.match(pattern, os.environ.get("GITHUB_REF")).groups()
@@ -34,7 +34,7 @@ VSVersionInfo(
         StringStruct(u'ProductVersion', u'{version_number_str}'),
         StringStruct(u'CompanyShortName', u'None'),
         StringStruct(u'ProductShortName', u'vrc_meta_tool'),
-        StringStruct(u'LastChange', u'{version}'),
+        StringStruct(u'LastChange', u'{commitHash}'),
         StringStruct(u'Official Build', u'1')])
       ]),
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
