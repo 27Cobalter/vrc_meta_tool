@@ -18,6 +18,7 @@ def chunk_iter(data):
 
         yield (data[chunk_type:chunk_data], data[chunk_data:end])
 
+
 def end():
     for p in psutil.process_iter(attrs=["pid", "name"]):
         if p.info["pid"] == os.getpid():
@@ -29,10 +30,12 @@ def end():
 
 def main(args):
     if len(args) == 1:
-        print("Usage: vrc_meta_reader.py  file\r\n"
-              "       vrc_meta_reader.py  file  user_name\r\n"
-              "\r\n"
-              "vrc_meta_reader.exeに画像ファイルをドラッグアンドドロップしてください")
+        print(
+            "Usage: vrc_meta_reader.py  file\r\n"
+            "       vrc_meta_reader.py  file  user_name\r\n"
+            "\r\n"
+            "vrc_meta_reader.exeに画像ファイルをドラッグアンドドロップしてください"
+        )
         end()
         return
     files = []
