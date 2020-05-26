@@ -34,6 +34,7 @@ out_dir: "meta_pic"
 ```
 
 - user_list.yml
+  - [自分の使ってるやつ](https://gist.github.com/27Cobalter/ddf341ba31395ab56bff82b4f0fc50b5)
 ```user_list.yml
 # nameにVRChatのユーザ名，screen_nameをTwitterのスクリーンネームにしておくとTwitterのスクリーンネームも保存してくれる
 - name: "27Cobalter"
