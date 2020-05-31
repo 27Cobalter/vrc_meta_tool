@@ -20,9 +20,11 @@ def select_log():
 
 def tail(thefile, realtime):
     # thefile.seek(0, 2)
+    offset = thefile.tell()
     while True:
         try:
             line = thefile.readline()
+            offset = thefile.tell()
             if not line:
                 if realtime:
                     break
@@ -34,7 +36,8 @@ def tail(thefile, realtime):
             line = line.rstrip("\n")
             yield line
         except UnicodeDecodeError:
-            continue
+            thefile.seek(offset, 0)
+            time.sleep(0.5)
 
 
 class LogToolBase:
