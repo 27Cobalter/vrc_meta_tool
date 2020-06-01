@@ -24,7 +24,6 @@ def tail(thefile, realtime):
     while True:
         try:
             line = thefile.readline()
-            offset = thefile.tell()
             if not line:
                 if realtime:
                     break
@@ -33,9 +32,11 @@ def tail(thefile, realtime):
             # VRChatが悪い
             if line == "\n" or line == "\r\n":
                 continue
+            offset = thefile.tell()
             line = line.rstrip("\n")
             yield line
         except UnicodeDecodeError:
+            print("\tUnicodeDecodeError")
             thefile.seek(offset, 0)
             time.sleep(0.5)
 
@@ -54,6 +55,7 @@ class VrcMetaTool(LogToolBase):
     user_names = []
     events = {}
 
+    photographer = ""
     world = ""
     users = []
 
@@ -69,13 +71,14 @@ class VrcMetaTool(LogToolBase):
         self.config = config
         self.user_names = user_names
 
+        self.events["Authenticated"] = "[VRCFlowManagerVRC] User Authenticated: "
         self.events["PlayerJoin"] = "[NetworkManager] OnPlayerJoined "
         self.events["PlayerLeft"] = "[NetworkManager] OnPlayerLeft "
         self.events["EnterRoom"] = "[RoomManager] Entering Room: "
         self.events["ScreenShot"] = "Took screenshot to: "
 
     def execute(self, line):
-        for event in self.events:
+        for event in list(self.events):
             index = line.find(self.events[event])
             if index != -1:
                 body = repr(line[index + len(self.events[event]) :])[1:-1]
@@ -108,6 +111,9 @@ class VrcMetaTool(LogToolBase):
                     )
                     print("\t", date, self.world)
                     print("\t", self.users)
+                elif event == "Authenticated":
+                    self.photographer = body
+                    del self.events["Authenticated"]
 
     # pngチャンク関連関数
     def has_meta(self, image):
@@ -141,6 +147,7 @@ class VrcMetaTool(LogToolBase):
             # IEND以降を上書きする
             f.seek(-12, 2)
             f.write(self.chunk(b"vrCd", date.encode("utf-8")))
+            f.write(self.chunk(b"vrCp", self.photographer.encode("utf-8")))
             f.write(self.chunk(b"vrCw", self.world.encode("utf-8")))
             for user in self.users:
                 if user in self.user_names:
