@@ -38,6 +38,8 @@ def tail(thefile, realtime):
             if line == "\n" or line == "\r\n":
                 continue
             offset = thefile.tell()
+            # 同一行でのエラーからの回復時に tried=0 に戻す
+            tried = 0
             line = line.rstrip("\n")
             yield line
         except UnicodeDecodeError:
