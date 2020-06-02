@@ -130,7 +130,7 @@ class VrcMetaTool(LogToolBase):
         total_length = len(image)
         end = 4
         while end + 8 < total_length:
-            length = int.from_bytes(image[end + 4: end + 8], "big")
+            length = int.from_bytes(image[end + 4 : end + 8], "big")
             chunk_type = end + 8
             chunk_data = chunk_type + 4
             end = chunk_data + length
