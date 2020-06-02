@@ -10,6 +10,7 @@ import yaml
 from struct import pack
 from zlib import crc32
 
+
 # ログツール関連共通化したい
 def select_log():
     vrc_dir = os.environ["USERPROFILE"] + "\\AppData\\LocalLow\\VRChat\\VRChat\\"
@@ -18,7 +19,11 @@ def select_log():
     return log_files[0]
 
 
+RETRY_LIMIT = 3
+
+
 def tail(thefile, realtime):
+    tried = 0
     # thefile.seek(0, 2)
     offset = thefile.tell()
     while True:
@@ -37,6 +42,11 @@ def tail(thefile, realtime):
             yield line
         except UnicodeDecodeError:
             print("\tUnicodeDecodeError")
+            tried += 1
+            if tried < RETRY_LIMIT:
+                tried = 0
+                offset = 0
+                continue
             thefile.seek(offset, 0)
             time.sleep(0.5)
 
@@ -120,7 +130,7 @@ class VrcMetaTool(LogToolBase):
         total_length = len(image)
         end = 4
         while end + 8 < total_length:
-            length = int.from_bytes(image[end + 4 : end + 8], "big")
+            length = int.from_bytes(image[end + 4: end + 8], "big")
             chunk_type = end + 8
             chunk_data = chunk_type + 4
             end = chunk_data + length
