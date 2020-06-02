@@ -43,7 +43,7 @@ def tail(thefile, realtime):
         except UnicodeDecodeError:
             print("\tUnicodeDecodeError")
             tried += 1
-            if tried < RETRY_LIMIT:
+            if tried >= RETRY_LIMIT:
                 tried = 0
                 offset = 0
                 continue
