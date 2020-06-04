@@ -3,7 +3,7 @@
 - 4/2のアップデートでデフォルトで`OnPlayerJoined`, `OnPlayerLeft`などのログが出力されなくなったためSteamから`プロパティ->起動オプションを設定`を開いて`--enable-sdk-log-levels`を追加してください
 - コマンドプロンプトの仕様で初期設定でテキスト部分クリックすると止まるので特に支障がなければ[これ](https://twitter.com/27Cobalter/status/1189919007555510272?s=20)もやっておくと良い
 ## これは何
-- VRChatで写真を撮ったときにワールド，インスタンスにいる人，撮影時刻をpngに埋め込んで記録するツール
+- VRChatで写真を撮ったときにワールド，撮影者，インスタンスにいる人，撮影時刻をpngに埋め込んで記録するツール
 
 ## ダウンロード
 - https://github.com/27Cobalter/vrc_meta_tool/releases
