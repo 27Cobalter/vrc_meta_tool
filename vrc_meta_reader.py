@@ -68,6 +68,8 @@ def main(args):
                             chunk_data.decode()[:-3], "%Y%m%d%H%M%S"
                         ),
                     )
+                elif chunk_type == b"vrCp":
+                    print("Photo by:", chunk_data.decode())
                 elif chunk_type == b"vrCw":
                     print("World:", chunk_data.decode())
         else:

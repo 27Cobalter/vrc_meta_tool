@@ -8,7 +8,7 @@ def main(args):
         src_data = yaml.load(src, Loader=yaml.SafeLoader)
         data = sorted(src_data, key=lambda x: x[list(src_data[0].keys())[0]])
         print(data)
-    with open(args[1], "w", encoding="utf-8") as dst:
+    with open(args[1], "w", encoding="utf-8", newline="\n") as dst:
         yaml.dump(
             data,
             dst,

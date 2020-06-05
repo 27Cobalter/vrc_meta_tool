@@ -10,6 +10,7 @@ import yaml
 from struct import pack
 from zlib import crc32
 
+
 # ログツール関連共通化したい
 def select_log():
     vrc_dir = os.environ["USERPROFILE"] + "\\AppData\\LocalLow\\VRChat\\VRChat\\"
@@ -18,8 +19,13 @@ def select_log():
     return log_files[0]
 
 
+RETRY_LIMIT = 3
+
+
 def tail(thefile, realtime):
+    tried = 0
     # thefile.seek(0, 2)
+    offset = thefile.tell()
     while True:
         try:
             line = thefile.readline()
@@ -31,10 +37,20 @@ def tail(thefile, realtime):
             # VRChatが悪い
             if line == "\n" or line == "\r\n":
                 continue
+            offset = thefile.tell()
+            # 同一行でのエラーからの回復時に tried=0 に戻す
+            tried = 0
             line = line.rstrip("\n")
             yield line
         except UnicodeDecodeError:
-            continue
+            print("\tUnicodeDecodeError")
+            tried += 1
+            if tried >= RETRY_LIMIT:
+                tried = 0
+                offset = 0
+                continue
+            thefile.seek(offset, 0)
+            time.sleep(0.5)
 
 
 class LogToolBase:
@@ -51,6 +67,7 @@ class VrcMetaTool(LogToolBase):
     user_names = []
     events = {}
 
+    photographer = ""
     world = ""
     users = []
 
@@ -66,13 +83,14 @@ class VrcMetaTool(LogToolBase):
         self.config = config
         self.user_names = user_names
 
+        self.events["Authenticated"] = "[VRCFlowManagerVRC] User Authenticated: "
         self.events["PlayerJoin"] = "[NetworkManager] OnPlayerJoined "
         self.events["PlayerLeft"] = "[NetworkManager] OnPlayerLeft "
         self.events["EnterRoom"] = "[RoomManager] Entering Room: "
         self.events["ScreenShot"] = "Took screenshot to: "
 
     def execute(self, line):
-        for event in self.events:
+        for event in list(self.events):
             index = line.find(self.events[event])
             if index != -1:
                 body = repr(line[index + len(self.events[event]) :])[1:-1]
@@ -105,6 +123,9 @@ class VrcMetaTool(LogToolBase):
                     )
                     print("\t", date, self.world)
                     print("\t", self.users)
+                elif event == "Authenticated":
+                    self.photographer = body
+                    del self.events["Authenticated"]
 
     # pngチャンク関連関数
     def has_meta(self, image):
@@ -138,6 +159,7 @@ class VrcMetaTool(LogToolBase):
             # IEND以降を上書きする
             f.seek(-12, 2)
             f.write(self.chunk(b"vrCd", date.encode("utf-8")))
+            f.write(self.chunk(b"vrCp", self.photographer.encode("utf-8")))
             f.write(self.chunk(b"vrCw", self.world.encode("utf-8")))
             for user in self.users:
                 if user in self.user_names:
