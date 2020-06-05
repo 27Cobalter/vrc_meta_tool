@@ -3,7 +3,7 @@ import re
 
 commit_hash = os.environ.get("GITHUB_SHA")
 version_number = []
-pattern = re.compile(".*v([0-9]+)\.([0-9]+).([0-9]+).")
+pattern = re.compile(".*v([0-9]+)\.([0-9]+)\.([0-9]+)")
 version_number = re.match(pattern, os.environ.get("GITHUB_REF")).groups()
 version_number_str = "{}.{}.{}".format(
     version_number[0], version_number[1], version_number[2]
