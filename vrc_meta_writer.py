@@ -53,7 +53,7 @@ def tailf(thefile, offset):
             time.sleep(0.5)
 
 
-def tail(thefile, realtime, offset):
+def tail(thefile, realtime):
     tried = 0
     # thefile.seek(0, 2)
     offset = thefile.tell()
