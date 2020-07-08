@@ -94,7 +94,7 @@ class VrcMetaTool(LogToolBase):
         for event in list(self.events):
             index = line.find(self.events[event])
             if index != -1:
-                body = repr(line[index + len(self.events[event]) :])[1:-1]
+                body = repr(line[index + len(self.events[event]):])[1:-1]
                 print(
                     self.log_date_regex.match(line).group(1), "\t" + event + ": " + body
                 )
@@ -133,7 +133,7 @@ class VrcMetaTool(LogToolBase):
         total_length = len(image)
         end = 4
         while end + 8 < total_length:
-            length = int.from_bytes(image[end + 4 : end + 8], "big")
+            length = int.from_bytes(image[end + 4: end + 8], "big")
             chunk_type = end + 8
             chunk_data = chunk_type + 4
             end = chunk_data + length
@@ -149,7 +149,7 @@ class VrcMetaTool(LogToolBase):
         if not os.path.samefile(os.path.dirname(file), self.config["out_dir"]):
             shutil.copy2(os.path.abspath(file), self.config["out_dir"])
         with open(
-            os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
+                os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
         ) as f:
             image = f.read()
             assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
@@ -170,6 +170,38 @@ class VrcMetaTool(LogToolBase):
             return True
 
 
+def verify_process_name():
+    process_name = "vrc_meta_writer.exe"
+
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["pid"] == os.getpid():
+            if p.info["name"] != process_name:
+                break
+            print("\n\nEnterを押して終了")
+            input()
+
+
+# def file_handler():
+#     skip
+
+class Process:
+    def __init__(self, name, pid, args):
+        self.name = name
+        self.pid = pid
+        self.args = args
+
+
+def find_process_by_name(name):
+    """
+    :param name:
+    :return: Process
+    """
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["name"] == "VRChat.exe":
+            return Process(p.info["name"], p["pid"], p.cmdline())
+    return None
+
+
 def main():
     config = {}
     with open("config.yml", "r", encoding="utf-8") as conf:
@@ -181,16 +213,12 @@ def main():
         for user in users:
             user_names[repr(user["name"])[1:-1]] = user["screen_name"]
 
-    process_exist = False
-    for p in psutil.process_iter(attrs=["pid", "name"]):
-        if p.info["name"] == "VRChat.exe":
-            # VRChatを起動中で起動引数が設定されていなかったら終了
-            if not "--enable-sdk-log-levels" in p.cmdline():
-                print(
-                    "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
-                )
-                return
-            process_exist = True
+    process = find_process_by_name("VRChat.exe")
+    if not "--enable-sdk-log-levels" in process.args:
+        print(
+            "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
+        )
+        return
 
     log_file = config["log_file"]
     if log_file == "":
@@ -198,19 +226,29 @@ def main():
 
     vrc_meta_tool = VrcMetaTool(config, user_names)
 
+    tagging_only = (config["log_file"] != "") or not process
+    if tagging_only:
+        with open(log_file, "r", encoding="utf-8") as f:
+            print("open logfile : ", log_file)
+            lines = tail(f, tagging_only)
+            for line in lines:
+                vrc_meta_tool.execute(line)
+            verify_process_name()
+
     with open(log_file, "r", encoding="utf-8") as f:
         print("open logfile : ", log_file)
 
-        lines = tail(f, (config["log_file"] != "") or not process_exist)
+        lines = tail(f, (config["log_file"] != "") or not process)
         for line in lines:
             vrc_meta_tool.execute(line)
+        verify_process_name()
 
-        for p in psutil.process_iter(attrs=["pid", "name"]):
-            if p.info["pid"] == os.getpid():
-                if p.info["name"] != "vrc_meta_writer.exe":
-                    break
-                print("\n\nEnterを押して終了")
-                input()
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["pid"] == os.getpid():
+            if p.info["name"] != "vrc_meta_writer.exe":
+                break
+            print("\n\nEnterを押して終了")
+            input()
 
 
 if __name__ == "__main__":
