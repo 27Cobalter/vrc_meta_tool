@@ -1,5 +1,6 @@
 import datetime
 import glob
+import linecache
 import os
 import psutil
 import re
@@ -24,34 +25,17 @@ def select_log():
 
 
 RETRY_LIMIT = 3
-def tailf(thefile, offset):
-    tried = 0
-    # thefile.seek(0, 2)
-    offset = thefile.tell()
-    while True:
-        try:
-            line = thefile.readline()
-            if not line:
-                time.sleep(0.5)
-                continue
-            # VRChatが悪い
-            if line == "\n" or line == "\r\n":
-                continue
-            offset = thefile.tell()
-            # 同一行でのエラーからの回復時に tried=0 に戻す
-            tried = 0
-            line = line.rstrip("\n")
-            yield line
-        except UnicodeDecodeError:
-            print("\tUnicodeDecodeError")
-            tried += 1
-            if tried >= RETRY_LIMIT:
-                tried = 0
-                offset = 0
-                continue
-            thefile.seek(offset, 0)
-            time.sleep(0.5)
 
+
+def tailf(file_name, offset):
+    with open(file_name) as fp:
+        for i, line in enumerate(fp):
+            if i < offset:
+                continue
+
+            line = fp.readline()
+            if line == "\n" or line == "\r\n":
+                yield line
 
 def tail(thefile, realtime):
     tried = 0
@@ -231,14 +215,11 @@ def find_process_by_name(name):
 
 
 class file_handler(FileSystemEventHandler):
-
     current_filename = ""
     current_offset = None
     vrc_meta_tool = None
 
-    def __init__(self, vrc_meta_tool):
-        self.current_filename = ""
-        self.current_offset = None
+    def inject_vrc_meta_tool(self, vrc_meta_tool):
         self.vrc_meta_tool = vrc_meta_tool
 
     def on_created(self, event):
@@ -299,6 +280,7 @@ def main():
             verify_process_name()
 
     event_handler = file_handler()
+    event_handler.inject_vrc_meta_tool(vrc_meta_tool)
     observer = Observer()
     observer.schedule(event_handler, vrc_dir, recursive=True)
     observer.start()
