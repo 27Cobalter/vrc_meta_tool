@@ -94,7 +94,7 @@ class VrcMetaTool(LogToolBase):
         for event in list(self.events):
             index = line.find(self.events[event])
             if index != -1:
-                body = repr(line[index + len(self.events[event]):])[1:-1]
+                body = repr(line[index + len(self.events[event]) :])[1:-1]
                 print(
                     self.log_date_regex.match(line).group(1), "\t" + event + ": " + body
                 )
@@ -133,7 +133,7 @@ class VrcMetaTool(LogToolBase):
         total_length = len(image)
         end = 4
         while end + 8 < total_length:
-            length = int.from_bytes(image[end + 4: end + 8], "big")
+            length = int.from_bytes(image[end + 4 : end + 8], "big")
             chunk_type = end + 8
             chunk_data = chunk_type + 4
             end = chunk_data + length
@@ -149,7 +149,7 @@ class VrcMetaTool(LogToolBase):
         if not os.path.samefile(os.path.dirname(file), self.config["out_dir"]):
             shutil.copy2(os.path.abspath(file), self.config["out_dir"])
         with open(
-                os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
+            os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
         ) as f:
             image = f.read()
             assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
@@ -181,9 +181,6 @@ def verify_process_name():
             input()
 
 
-# def file_handler():
-#     skip
-
 class Process:
     def __init__(self, name, pid, args):
         self.name = name
@@ -197,9 +194,13 @@ def find_process_by_name(name):
     :return: Process
     """
     for p in psutil.process_iter(attrs=["pid", "name"]):
-        if p.info["name"] == "VRChat.exe":
+        if p.info["name"] == name:
             return Process(p.info["name"], p["pid"], p.cmdline())
     return None
+
+
+def file_handler(file_name, offset):
+    pass
 
 
 def main():
@@ -215,9 +216,7 @@ def main():
 
     process = find_process_by_name("VRChat.exe")
     if not "--enable-sdk-log-levels" in process.args:
-        print(
-            "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
-        )
+        print("Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください")
         return
 
     log_file = config["log_file"]
