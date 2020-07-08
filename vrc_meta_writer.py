@@ -7,8 +7,12 @@ import shutil
 import time
 import yaml
 
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 from struct import pack
 from zlib import crc32
+
+vrc_dir = os.environ["USERPROFILE"] + "\\AppData\\LocalLow\\VRChat\\VRChat\\"
 
 
 # ログツール関連共通化したい
@@ -20,9 +24,36 @@ def select_log():
 
 
 RETRY_LIMIT = 3
+def tailf(thefile, offset):
+    tried = 0
+    # thefile.seek(0, 2)
+    offset = thefile.tell()
+    while True:
+        try:
+            line = thefile.readline()
+            if not line:
+                time.sleep(0.5)
+                continue
+            # VRChatが悪い
+            if line == "\n" or line == "\r\n":
+                continue
+            offset = thefile.tell()
+            # 同一行でのエラーからの回復時に tried=0 に戻す
+            tried = 0
+            line = line.rstrip("\n")
+            yield line
+        except UnicodeDecodeError:
+            print("\tUnicodeDecodeError")
+            tried += 1
+            if tried >= RETRY_LIMIT:
+                tried = 0
+                offset = 0
+                continue
+            thefile.seek(offset, 0)
+            time.sleep(0.5)
 
 
-def tail(thefile, realtime):
+def tail(thefile, realtime, offset):
     tried = 0
     # thefile.seek(0, 2)
     offset = thefile.tell()
@@ -94,7 +125,7 @@ class VrcMetaTool(LogToolBase):
         for event in list(self.events):
             index = line.find(self.events[event])
             if index != -1:
-                body = repr(line[index + len(self.events[event]) :])[1:-1]
+                body = repr(line[index + len(self.events[event]):])[1:-1]
                 print(
                     self.log_date_regex.match(line).group(1), "\t" + event + ": " + body
                 )
@@ -133,7 +164,7 @@ class VrcMetaTool(LogToolBase):
         total_length = len(image)
         end = 4
         while end + 8 < total_length:
-            length = int.from_bytes(image[end + 4 : end + 8], "big")
+            length = int.from_bytes(image[end + 4: end + 8], "big")
             chunk_type = end + 8
             chunk_data = chunk_type + 4
             end = chunk_data + length
@@ -149,7 +180,7 @@ class VrcMetaTool(LogToolBase):
         if not os.path.samefile(os.path.dirname(file), self.config["out_dir"]):
             shutil.copy2(os.path.abspath(file), self.config["out_dir"])
         with open(
-            os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
+                os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
         ) as f:
             image = f.read()
             assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
@@ -199,8 +230,41 @@ def find_process_by_name(name):
     return None
 
 
-def file_handler(file_name, offset):
-    pass
+class file_handler(FileSystemEventHandler):
+
+    current_filename = ""
+    current_offset = None
+    vrc_meta_tool = None
+
+    def __init__(self, vrc_meta_tool):
+        self.current_filename = ""
+        self.current_offset = None
+        self.vrc_meta_tool = vrc_meta_tool
+
+    def on_created(self, event):
+        if event.is_directory:
+            return
+
+        filepath = event.src_path
+        self.current_filename = os.path.basename(filepath)
+        self.current_offset = 0
+        lines = tailf(self.current_filename, self.current_offset)
+        for line in lines:
+            self.vrc_meta_tool.execute(line)
+
+    def on_modified(self, event):
+        if event.is_directory:
+            return
+
+        filepath = event.src_path
+        event_file = os.path.basename(filepath)
+
+        # 今現在のログファイル以外の更新は無視する
+        if self.current_filename != event_file:
+            return
+        lines = tailf(self.current_filename, self.current_offset)
+        for line in lines:
+            self.vrc_meta_tool.execute(line)
 
 
 def main():
@@ -234,20 +298,10 @@ def main():
                 vrc_meta_tool.execute(line)
             verify_process_name()
 
-    with open(log_file, "r", encoding="utf-8") as f:
-        print("open logfile : ", log_file)
-
-        lines = tail(f, (config["log_file"] != "") or not process)
-        for line in lines:
-            vrc_meta_tool.execute(line)
-        verify_process_name()
-
-    for p in psutil.process_iter(attrs=["pid", "name"]):
-        if p.info["pid"] == os.getpid():
-            if p.info["name"] != "vrc_meta_writer.exe":
-                break
-            print("\n\nEnterを押して終了")
-            input()
+    event_handler = file_handler()
+    observer = Observer()
+    observer.schedule(event_handler, vrc_dir, recursive=True)
+    observer.start()
 
 
 if __name__ == "__main__":
