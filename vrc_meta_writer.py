@@ -201,7 +201,7 @@ def main():
 
     process = find_process_by_name("VRChat.exe")
 
-    if not "--enable-sdk-log-levels" in process.args:
+    if process is not None and not "--enable-sdk-log-levels" in process.args:
         print("Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください")
         return
 
