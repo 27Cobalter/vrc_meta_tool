@@ -184,7 +184,7 @@ def find_process_by_name(name):
     """
     for p in psutil.process_iter(attrs=["pid", "name"]):
         if p.info["name"] == name:
-            return Process(p.info["name"], p["pid"], p.cmdline())
+            return Process(p.info["name"], p.pid, p.cmdline())
     return None
 
 
