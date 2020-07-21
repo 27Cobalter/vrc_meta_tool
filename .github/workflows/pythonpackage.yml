@@ -42,5 +42,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: "dist/vrc_meta_tool.zip"
+        prerelease: ${{ contains(github.ref, '-beta') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

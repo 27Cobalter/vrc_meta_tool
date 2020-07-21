@@ -54,10 +54,10 @@ def tail(thefile, realtime):
 
 
 class LogToolBase:
-    def init():
+    def init(self):
         pass
 
-    def execute(line):
+    def execute(self, line):
         pass
 
 
@@ -170,6 +170,24 @@ class VrcMetaTool(LogToolBase):
             return True
 
 
+class Process:
+    def __init__(self, name, pid, args):
+        self.name = name
+        self.pid = pid
+        self.args = args
+
+
+def find_process_by_name(name):
+    """
+    :param name:
+    :return: Process
+    """
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["name"] == name:
+            return Process(p.info["name"], p.pid, p.cmdline())
+    return None
+
+
 def main():
     config = {}
     with open("config.yml", "r", encoding="utf-8") as conf:
@@ -181,16 +199,11 @@ def main():
         for user in users:
             user_names[repr(user["name"])[1:-1]] = user["screen_name"]
 
-    process_exist = False
-    for p in psutil.process_iter(attrs=["pid", "name"]):
-        if p.info["name"] == "VRChat.exe":
-            # VRChatを起動中で起動引数が設定されていなかったら終了
-            if not "--enable-sdk-log-levels" in p.cmdline():
-                print(
-                    "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
-                )
-                return
-            process_exist = True
+    process = find_process_by_name("VRChat.exe")
+
+    if process is not None and not "--enable-sdk-log-levels" in process.args:
+        print("Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください")
+        return
 
     log_file = config["log_file"]
     if log_file == "":
@@ -201,7 +214,7 @@ def main():
     with open(log_file, "r", encoding="utf-8") as f:
         print("open logfile : ", log_file)
 
-        lines = tail(f, (config["log_file"] != "") or not process_exist)
+        lines = tail(f, (config["log_file"] != "") or not process)
         for line in lines:
             vrc_meta_tool.execute(line)
 
