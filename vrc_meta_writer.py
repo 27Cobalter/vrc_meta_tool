@@ -57,7 +57,7 @@ class LogToolBase:
     def init(self):
         pass
 
-    def execute(line):
+    def execute(self, line):
         pass
 
 
