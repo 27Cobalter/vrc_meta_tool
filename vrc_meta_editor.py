@@ -162,6 +162,7 @@ def main(args):
             )
 
     metadata.sort_users()
+    metadata.print()
 
     while True:
         mode = input("Add/Update/Delete/Print/Quit [a/u/d/p/q] ")
