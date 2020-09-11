@@ -35,7 +35,7 @@ jobs:
         pyinstaller.exe vrc_meta_writer.py --version-file "version.txt" -F
         pyinstaller.exe vrc_meta_reader.py --version-file "version.txt" -F
         pyinstaller.exe user_list_sorter.py --version-file "version.txt" -F
-        pyinstaller.exe vrc_meta_reader.py --version-file "version.txt" -F
+        pyinstaller.exe vrc_meta_editor.py --version-file "version.txt" -F
     - name: Achive to zip
       run: |
         powershell compress-archive -Path dist/vrc_meta_writer.exe,dist/vrc_meta_reader.exe,dist/user_list_sorter.exe,dist/vrc_meta_editor.exe,config.yml,user_list.yml,README.md -DestinationPath dist/vrc_meta_tool.zip
