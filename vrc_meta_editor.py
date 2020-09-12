@@ -70,7 +70,10 @@ class MetaData:
 
     def print(self):
         print("-" * 80)
-        print("Date:", datetime.datetime.strptime(self.date[:-3], self.FORMAT_DATE_RAW_DATA))
+        print(
+            "Date:",
+            datetime.datetime.strptime(self.date[:-3], self.FORMAT_DATE_RAW_DATA),
+        )
         print("Photographer:", self.photographer)
         print("World:", self.world)
         for user in self.users:
