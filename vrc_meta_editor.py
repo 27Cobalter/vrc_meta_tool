@@ -166,7 +166,11 @@ def main(args):
 
     while True:
         mode = input("Add/Update/Delete/Print/Quit [a/u/d/p/q] ")
-        if mode in {"a", "A", "add", "Add"}:
+        if len(mode) == 0:
+            continue
+
+        mode_initial = mode[0][:1].lower()
+        if mode_initial == "a":
             # ユーザ追加
             vrcname = input("VRCName: ")
             if vrcname == "":
@@ -179,30 +183,31 @@ def main(args):
             metadata.sort_users()
             chunkutils.write(image_path, metadata)
 
-        elif mode in {"u", "U", "update", "Update"}:
+        elif mode_initial == "u":
             item = input("Date/Photographer/World/VRCName/TwitterID [d/p/w/v/t] ")
-            if item in {"d", "D", "date", "Date"}:
+            item_initial = item[0][:1].lower()
+            if item_initial == "d":
                 # 撮影日時変更
                 date = input('New Date(eg: "2018-05-10 18:52:00": ')
                 metadata.update_date(date)
 
                 chunkutils.write(image_path, metadata)
 
-            elif item in {"p", "P", "photographer", "Photographer"}:
+            elif item_initial == "p":
                 # 撮影者変更
                 photographer = input("New Photographer: ")
                 metadata.update_photographer(photographer)
 
                 chunkutils.write(image_path, metadata)
 
-            elif item in {"w", "W", "world", "World"}:
+            elif item_initial == "w":
                 # 撮影ワールド変更
                 world = input("New World: ")
                 metadata.update_world(world)
 
                 chunkutils.write(image_path, metadata)
 
-            elif item in {"v", "V", "vrcname", "VRCName"}:
+            elif item_initial == "v":
                 # VRCNameの変更
                 metadata.print_users()
                 index = input("Select user: ")
@@ -212,7 +217,7 @@ def main(args):
 
                 chunkutils.write(image_path, metadata)
 
-            elif item in {"t", "T", "twitterid", "TwitterID"}:
+            elif item_initial == "t":
                 # TwitterIDの変更
                 metadata.print_users()
                 index = input("Select user: ")
@@ -221,7 +226,7 @@ def main(args):
 
                 chunkutils.write(image_path, metadata)
 
-        elif mode in {"d", "D", "delete", "Delete"}:
+        elif mode_initial == "d":
             # ユーザ削除
             metadata.print_users()
             user_input = input('Select User (eg:"1 2 3", "1-3", "^4"): ')
