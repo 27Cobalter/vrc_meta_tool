@@ -185,6 +185,9 @@ def main(args):
 
         elif mode_initial == "u":
             item = input("Date/Photographer/World/VRCName/TwitterID [d/p/w/v/t] ")
+            if len(item) == 0:
+                continue
+
             item_initial = item[0].lower()
             if item_initial == "d":
                 # 撮影日時変更
