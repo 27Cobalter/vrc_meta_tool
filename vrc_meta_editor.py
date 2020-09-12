@@ -169,7 +169,7 @@ def main(args):
         if len(mode) == 0:
             continue
 
-        mode_initial = mode[0][:1].lower()
+        mode_initial = mode[0].lower()
         if mode_initial == "a":
             # ユーザ追加
             vrcname = input("VRCName: ")
@@ -185,7 +185,7 @@ def main(args):
 
         elif mode_initial == "u":
             item = input("Date/Photographer/World/VRCName/TwitterID [d/p/w/v/t] ")
-            item_initial = item[0][:1].lower()
+            item_initial = item[0].lower()
             if item_initial == "d":
                 # 撮影日時変更
                 date = input('New Date(eg: "2018-05-10 18:52:00": ')
