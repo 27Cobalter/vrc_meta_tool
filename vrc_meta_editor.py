@@ -5,6 +5,10 @@ from zlib import crc32
 
 
 class MetaData:
+
+    FORMAT_DATE_USER_INPUT = "%Y-%m-%d %H:%M:%S"
+    FORMAT_DATE_RAW_DATA = "%Y%m%d%H%M%S"
+
     def __init__(self):
         self.date = ""
         self.photographer = ""
@@ -13,9 +17,16 @@ class MetaData:
         # PNG ファイルシグネチャ
         self.other_data = b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
 
+    def validate_date_format(self, str_date):
+        try:
+            datetime.datetime.strptime(str_date, self.FORMAT_DATE_USER_INPUT)
+            return True
+        except ValueError:
+            return False
+
     def update_date(self, strdate):
-        date = datetime.datetime.strptime(strdate, "%Y-%m-%d %H:%M:%S")
-        strdate = datetime.datetime.strftime(date, "%Y%m%d%H%M%S") + "000"
+        date = datetime.datetime.strptime(strdate, self.FORMAT_DATE_USER_INPUT)
+        strdate = datetime.datetime.strftime(date, self.FORMAT_DATE_RAW_DATA) + "000"
         self.date = strdate
 
     def update_photographer(self, photographer):
@@ -59,7 +70,10 @@ class MetaData:
 
     def print(self):
         print("-" * 80)
-        print("Date:", datetime.datetime.strptime(self.date[:-3], "%Y%m%d%H%M%S"))
+        print(
+            "Date:",
+            datetime.datetime.strptime(self.date[:-3], self.FORMAT_DATE_RAW_DATA),
+        )
         print("Photographer:", self.photographer)
         print("World:", self.world)
         for user in self.users:
@@ -191,7 +205,13 @@ def main(args):
             item_initial = item[0].lower()
             if item_initial == "d":
                 # 撮影日時変更
-                date = input('New Date(eg: "2018-05-10 18:52:00": ')
+                valid = False
+                while not valid:
+                    date = input('New Date(eg: "2018-05-10 18:52:00": ')
+                    valid = metadata.validate_date_format(date)
+                    if not valid:
+                        print("invalid date format. expected YYYY-MM-DD HH:mm:ss")
+
                 metadata.update_date(date)
 
                 chunkutils.write(image_path, metadata)
