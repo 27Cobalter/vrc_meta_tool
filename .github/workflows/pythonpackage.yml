@@ -23,9 +23,9 @@ jobs:
         architecture: x64
     - name: Install dependencies
     - uses: BSFishy/pip-action@v1
-    with:
-      packages: package
-      requirements: requirements.txt
+      with:
+        packages: package
+        requirements: requirements.txt
 
     - name: Generate version file
       run: |
