@@ -2,4 +2,4 @@ pyyaml
 psutil
 pytest
 black
-PyInstaller
+pyinstaller
