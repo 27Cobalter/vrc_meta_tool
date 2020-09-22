@@ -1,0 +1,5 @@
+pyyaml
+psutil
+pytest
+black
+PyInstaller
