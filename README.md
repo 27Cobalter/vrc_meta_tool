@@ -9,10 +9,10 @@
 - https://github.com/27Cobalter/vrc_meta_tool/releases
 
 ## 自分で色々やりたい人向け
-### 依存パッケージ
-- pyyaml
-```
-$ pip install pyyaml
+### 依存パッケージインストール
+
+```bash
+pip install -r requirements.txt
 ```
 
 ### 実行方法
