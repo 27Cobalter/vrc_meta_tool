@@ -11,8 +11,9 @@
 ## 自分で色々やりたい人向け
 ### 依存パッケージ
 - pyyaml
+- psutil
 ```
-$ pip install pyyaml
+$ pip install -r requirements.txt
 ```
 
 ### 実行方法
