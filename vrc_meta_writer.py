@@ -154,6 +154,7 @@ class VrcMetaTool(LogToolBase):
             self.config["out_dir"], os.path.basename(os.path.dirname(file))
         )
         if not os.path.samefile(os.path.dirname(file), sub_dir):
+            os.makedirs(sub_dir, exist_ok=True)
             shutil.copy2(os.path.abspath(file), sub_dir)
         with open(os.path.join(sub_dir, os.path.basename(file)), "r+b") as f:
             image = f.read()
