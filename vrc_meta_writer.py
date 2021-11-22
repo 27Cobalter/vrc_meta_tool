@@ -84,10 +84,10 @@ class VrcMetaTool(LogToolBase):
         self.config = config
         self.user_names = user_names
 
-        self.events["Authenticated"] = "[VRCFlowManagerVRC] User Authenticated: "
-        self.events["PlayerJoin"] = "[NetworkManager] OnPlayerJoined "
-        self.events["PlayerLeft"] = "[NetworkManager] OnPlayerLeft "
-        self.events["EnterRoom"] = "[RoomManager] Entering Room: "
+        self.events["Authenticated"] = "] User Authenticated: "
+        self.events["PlayerJoin"] = "] OnPlayerJoined "
+        self.events["PlayerLeft"] = "] OnPlayerLeft "
+        self.events["EnterRoom"] = "] Entering Room: "
         self.events["ScreenShot"] = "Took screenshot to: "
 
     def execute(self, line):
