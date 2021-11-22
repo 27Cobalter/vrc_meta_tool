@@ -119,7 +119,11 @@ class VrcMetaTool(LogToolBase):
                         body,
                         "\n\t\t->",
                         os.path.abspath(
-                            os.path.join(self.config["out_dir"], os.path.basename(body))
+                            os.path.join(
+                                self.config["out_dir"],
+                                os.path.basename(os.path.dirname(body)),
+                                os.path.basename(body),
+                            )
                         ),
                     )
                     print("\t", date, self.world)
@@ -146,11 +150,12 @@ class VrcMetaTool(LogToolBase):
 
     def write(self, file, date):
         self.users.sort()
-        if not os.path.samefile(os.path.dirname(file), self.config["out_dir"]):
-            shutil.copy2(os.path.abspath(file), self.config["out_dir"])
-        with open(
-            os.path.join(self.config["out_dir"], os.path.basename(file)), "r+b"
-        ) as f:
+        sub_dir = os.path.join(
+            self.config["out_dir"], os.path.basename(os.path.dirname(file))
+        )
+        if not os.path.samefile(os.path.dirname(file), sub_dir):
+            shutil.copy2(os.path.abspath(file), sub_dir)
+        with open(os.path.join(sub_dir, os.path.basename(file)), "r+b") as f:
             image = f.read()
             assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
             if self.has_meta(image):
