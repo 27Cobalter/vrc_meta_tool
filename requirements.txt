@@ -1,2 +1,5 @@
 pyyaml
 psutil
+pytest
+black
+pyinstaller

@@ -24,6 +24,8 @@ $ pip install -r requirements.txt
   - `vrc_meta_reader.exe dir user_name`で対象ディレクトリ内のユーザが含まれる画像のパスを出力
   - またはvrc_meta_reader.exeに画像をドラッグアンドドロップ
   - がとーしょこらさんの[VRCPhotoAlbum](https://github.com/gatosyocora/VRCPhotoAlbum)を使うと画像を見ながらメタ情報の検索，閲覧ができます
+- メタ情報の編集
+  - `vrc_meta_editor.exe file`
 
 ## 設定ファイル
 - 例
