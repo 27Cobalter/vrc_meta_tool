@@ -72,7 +72,7 @@ class VrcMetaTool(LogToolBase):
     users = []
 
     photo_date_regex = re.compile(
-        ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png",
+        ".*VRChat_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3})_[0-9]*x[0-9]*.png",
         re.IGNORECASE,
     )
     log_date_regex = re.compile(
