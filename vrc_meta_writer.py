@@ -72,7 +72,7 @@ class VrcMetaTool(LogToolBase):
     users = []
 
     photo_date_regex = re.compile(
-        ".*VRChat_[0-9]*x[0-9]*_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3}).png",
+        ".*VRChat_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3})_[0-9]*x[0-9]*.png",
         re.IGNORECASE,
     )
     log_date_regex = re.compile(
@@ -89,6 +89,7 @@ class VrcMetaTool(LogToolBase):
         self.events["PlayerLeft"] = "] OnPlayerLeft "
         self.events["EnterRoom"] = "] Entering Room: "
         self.events["ScreenShot"] = "Took screenshot to: "
+        self.events["Quit"] = "VRCApplication: OnApplicationQuit"
 
     def execute(self, line):
         for event in list(self.events):
@@ -131,6 +132,8 @@ class VrcMetaTool(LogToolBase):
                 elif event == "Authenticated":
                     self.photographer = body
                     del self.events["Authenticated"]
+                elif event == "Quit":
+                    return True
 
     # pngチャンク関連関数
     def has_meta(self, image):
@@ -222,14 +225,15 @@ def main():
 
         lines = tail(f, (config["log_file"] != "") or not process)
         for line in lines:
-            vrc_meta_tool.execute(line)
+            if vrc_meta_tool.execute(line):
+                break
 
-        for p in psutil.process_iter(attrs=["pid", "name"]):
-            if p.info["pid"] == os.getpid():
-                if p.info["name"] != "vrc_meta_writer.exe":
-                    break
-                print("\n\nEnterを押して終了")
-                input()
+    for p in psutil.process_iter(attrs=["pid", "name"]):
+        if p.info["pid"] == os.getpid():
+            if p.info["name"] != "vrc_meta_writer.exe":
+                break
+            print("\n\nEnterを押して終了")
+            input()
 
 
 if __name__ == "__main__":
