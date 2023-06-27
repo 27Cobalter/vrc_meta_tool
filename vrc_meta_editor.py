@@ -5,7 +5,6 @@ from zlib import crc32
 
 
 class MetaData:
-
     FORMAT_DATE_USER_INPUT = "%Y-%m-%d %H:%M:%S"
     FORMAT_DATE_RAW_DATA = "%Y%m%d%H%M%S"
 
