@@ -156,7 +156,9 @@ class VrcMetaTool(LogToolBase):
         sub_dir = os.path.join(
             self.config["out_dir"], os.path.basename(os.path.dirname(file))
         )
-        if not os.path.samefile(os.path.dirname(file), sub_dir):
+        if not os.path.isdir(sub_dir) or not os.path.samefile(
+            os.path.dirname(file), sub_dir
+        ):
             os.makedirs(sub_dir, exist_ok=True)
             shutil.copy2(os.path.abspath(file), sub_dir)
         with open(os.path.join(sub_dir, os.path.basename(file)), "r+b") as f:
@@ -209,10 +211,6 @@ def main():
             user_names[repr(user["name"])[1:-1]] = user["screen_name"]
 
     process = find_process_by_name("VRChat.exe")
-
-    if process is not None and not "--enable-sdk-log-levels" in process.args:
-        print("Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください")
-        return
 
     log_file = config["log_file"]
     if log_file == "":
