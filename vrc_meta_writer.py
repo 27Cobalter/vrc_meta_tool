@@ -71,6 +71,9 @@ class VrcMetaTool(LogToolBase):
     world = ""
     users = []
 
+    user_data_regex = re.compile(
+        "(.*) \(usr_[a-f0-9-]{36}\)"
+    )
     photo_date_regex = re.compile(
         ".*VRChat_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3})_[0-9]*x[0-9]*.png",
         re.IGNORECASE,
@@ -100,10 +103,12 @@ class VrcMetaTool(LogToolBase):
                     self.log_date_regex.match(line).group(1), "\t" + event + ": " + body
                 )
                 if event == "PlayerJoin":
-                    self.users.append(body)
+                    user_name = self.user_data_regex.match(body).group(1)
+                    self.users.append(user_name)
                 elif event == "PlayerLeft":
-                    if body in self.users:
-                        self.users.remove(body)
+                    user_name = self.user_data_regex.match(body).group(1)
+                    if user_name in self.users:
+                        self.users.remove(user_name)
                 elif event == "EnterRoom":
                     self.world = body
                     self.users = []
