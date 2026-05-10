@@ -70,8 +70,12 @@ def main(args):
                     )
                 elif chunk_type == b"vrCp":
                     print("Photo by:", chunk_data.decode())
+                elif chunk_type == b"vrCb":
+                    print("Photo by (ID):", chunk_data.decode())
                 elif chunk_type == b"vrCw":
                     print("World:", chunk_data.decode())
+                elif chunk_type == b"vrCm":
+                    print("World (ID):", chunk_data.decode())
         else:
             for chunk_type, chunk_data in chunk_iter(data):
                 if chunk_type == b"vrCu":
