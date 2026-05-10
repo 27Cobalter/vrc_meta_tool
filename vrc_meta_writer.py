@@ -73,9 +73,7 @@ class VrcMetaTool(LogToolBase):
     world_id = ""
     users = []
 
-    user_data_regex = re.compile(
-        "(.*) \((usr_[a-f0-9-]{36})\)"
-    )
+    user_data_regex = re.compile("(.*) \((usr_[a-f0-9-]{36})\)")
     photo_date_regex = re.compile(
         ".*VRChat_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3})_[0-9]*x[0-9]*.png",
         re.IGNORECASE,
@@ -176,7 +174,7 @@ class VrcMetaTool(LogToolBase):
             shutil.copy2(os.path.abspath(file), sub_dir)
         with open(os.path.join(sub_dir, os.path.basename(file)), "r+b") as f:
             image = f.read()
-            assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+            assert image[:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"
             if self.has_meta(image):
                 print("\t", file, "already has meta data")
                 return False
@@ -228,7 +226,9 @@ def main():
     process = find_process_by_name("VRChat.exe")
 
     if process is not None and not "--enable-sdk-log-levels" in process.args:
-        print("Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください")
+        print(
+            "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
+        )
         return
 
     log_file = config["log_file"]
