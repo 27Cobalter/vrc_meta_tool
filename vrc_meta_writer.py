@@ -68,15 +68,18 @@ class VrcMetaTool(LogToolBase):
     events = {}
 
     photographer = ""
+    photographer_id = ""
     world = ""
+    world_id = ""
     users = []
 
-    user_data_regex = re.compile(
-        "(.*) \(usr_[a-f0-9-]{36}\)"
-    )
+    user_data_regex = re.compile("(.*) \((usr_[a-f0-9-]{36})\)")
     photo_date_regex = re.compile(
         ".*VRChat_([0-9]{4})-([0-9]{2})-([0-9]{2})_([0-9]{2})-([0-9]{2})-([0-9]{2}).([0-9]{3})_[0-9]*x[0-9]*.png",
         re.IGNORECASE,
+    )
+    world_id_regex = re.compile(
+        ".*(wrld_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}).*"
     )
     log_date_regex = re.compile(
         "([0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) .*?"
@@ -87,10 +90,11 @@ class VrcMetaTool(LogToolBase):
         self.config = config
         self.user_names = user_names
 
-        self.events["Authenticated"] = "] User Authenticated: "
+        self.events["Authenticated"] = "User Authenticated: "
         self.events["PlayerJoin"] = "] OnPlayerJoined "
         self.events["PlayerLeft"] = "] OnPlayerLeft "
         self.events["EnterRoom"] = "] Entering Room: "
+        self.events["JoinWorld"] = "] Joining wrld_"
         self.events["ScreenShot"] = "Took screenshot to: "
         self.events["Quit"] = "VRCApplication: OnApplicationQuit"
 
@@ -112,6 +116,8 @@ class VrcMetaTool(LogToolBase):
                 elif event == "EnterRoom":
                     self.world = body
                     self.users = []
+                elif event == "JoinWorld":
+                    self.world_id = self.world_id_regex.match(f"wrld_{body}").group(1)
                 elif event == "ScreenShot":
                     if not os.path.exists(body):
                         print("\tError", os.path.abspath(body), "is not found.")
@@ -135,7 +141,9 @@ class VrcMetaTool(LogToolBase):
                     print("\t", date, self.world)
                     print("\t", self.users)
                 elif event == "Authenticated":
-                    self.photographer = body
+                    user_match = self.user_data_regex.match(body)
+                    self.photographer = user_match.group(1)
+                    self.photographer_id = user_match.group(2)
                     del self.events["Authenticated"]
                 elif event == "Quit":
                     return True
@@ -166,7 +174,7 @@ class VrcMetaTool(LogToolBase):
             shutil.copy2(os.path.abspath(file), sub_dir)
         with open(os.path.join(sub_dir, os.path.basename(file)), "r+b") as f:
             image = f.read()
-            assert image[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+            assert image[:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"
             if self.has_meta(image):
                 print("\t", file, "already has meta data")
                 return False
@@ -175,7 +183,9 @@ class VrcMetaTool(LogToolBase):
             f.seek(-12, 2)
             f.write(self.chunk(b"vrCd", date.encode("utf-8")))
             f.write(self.chunk(b"vrCp", self.photographer.encode("utf-8")))
+            f.write(self.chunk(b"vrCb", self.photographer_id.encode("utf-8")))
             f.write(self.chunk(b"vrCw", self.world.encode("utf-8")))
+            f.write(self.chunk(b"vrCm", self.world_id.encode("utf-8")))
             for user in self.users:
                 if user in self.user_names:
                     user = user + " : " + self.user_names.get(user)
@@ -216,7 +226,9 @@ def main():
     process = find_process_by_name("VRChat.exe")
 
     if process is not None and not "--enable-sdk-log-levels" in process.args:
-        print("Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください")
+        print(
+            "Error:\tSteamからプロパティ->起動オプションを設定を開いて--enable-sdk-log-levelsを追加してください"
+        )
         return
 
     log_file = config["log_file"]

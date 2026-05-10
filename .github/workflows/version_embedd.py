@@ -9,8 +9,7 @@ version_number_str = "{}.{}.{}".format(
     version_number[0], version_number[1], version_number[2]
 )
 
-print(
-    f"""
+print(f"""
 VSVersionInfo(
   ffi=FixedFileInfo(
     filevers=({version_number[0]}, {version_number[1]}, {version_number[2]}, 0),
@@ -42,5 +41,4 @@ VSVersionInfo(
       ]),
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]
-)"""
-)
+)""")

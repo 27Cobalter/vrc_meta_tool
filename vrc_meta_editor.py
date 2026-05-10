@@ -15,7 +15,7 @@ class MetaData:
         self.world = ""
         self.users = []
         # PNG ファイルシグネチャ
-        self.other_data = b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+        self.other_data = b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"
 
     def validate_date_format(self, str_date):
         try:
@@ -157,7 +157,7 @@ def main(args):
 
     with open(image_path, "rb") as f:
         data = f.read()
-        assert data[:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"
+        assert data[:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a"
 
     # 画像のデータをmetadataに変換
     for chunk_type, chunk_data in chunkutils.chunk_iter(data):

@@ -52,7 +52,7 @@ def main(args):
         with open(image_path, "rb") as image:
             data = image.read()
 
-        if data[:8] != b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+        if data[:8] != b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
             continue
         if user_name == "":
             print(image_path)
@@ -70,8 +70,12 @@ def main(args):
                     )
                 elif chunk_type == b"vrCp":
                     print("Photo by:", chunk_data.decode())
+                elif chunk_type == b"vrCb":
+                    print("Photo by (ID):", chunk_data.decode())
                 elif chunk_type == b"vrCw":
                     print("World:", chunk_data.decode())
+                elif chunk_type == b"vrCm":
+                    print("World (ID):", chunk_data.decode())
         else:
             for chunk_type, chunk_data in chunk_iter(data):
                 if chunk_type == b"vrCu":
